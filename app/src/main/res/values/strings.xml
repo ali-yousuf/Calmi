@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">Calmi</string>
+    <string name="calmi">CALMI</string>
+    <string name="calmi_logo">Calmi Logo</string>
 </resources>
