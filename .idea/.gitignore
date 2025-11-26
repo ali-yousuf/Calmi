@@ -1,3 +1,11 @@
 # Default ignored files
 /shelf/
 /workspace.xml
+# Android Studio
+.idea/
+!.idea/codeStyles
+!.idea/runConfigurations
+.gradle/
+local.properties
+.DS_Store
+
