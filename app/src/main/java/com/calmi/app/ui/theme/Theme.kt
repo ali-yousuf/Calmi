@@ -1,30 +1,29 @@
 package com.calmi.app.ui.theme
 
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.lightColorScheme
+import androidx.compose.material3.darkColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 
-val LightColors = lightColorScheme(
+private val DarkColorScheme = darkColorScheme(
     primary = CalmPrimary,
     secondary = CalmSecondary,
     tertiary = CalmTertiary,
-
     background = CalmBackground,
     surface = CalmSurface,
-
     onPrimary = Color.White,
     onSecondary = CalmTextPrimary,
     onBackground = CalmTextPrimary,
     onSurface = CalmTextPrimary,
-
     error = CalmError
 )
 
 @Composable
-fun CalmiTheme(content: @Composable () -> Unit) {
+fun CalmiTheme(
+    content: @Composable () -> Unit
+) {
     MaterialTheme(
-        colorScheme = LightColors,
+        colorScheme = DarkColorScheme,
         typography = CalmiTypography,
         content = content
     )

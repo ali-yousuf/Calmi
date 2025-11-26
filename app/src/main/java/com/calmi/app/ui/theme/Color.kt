@@ -3,21 +3,21 @@ package com.calmi.app.ui.theme
 import androidx.compose.ui.graphics.Color
 
 // Brand Colors
-val CalmPrimary = Color(0xFF7BC9FF)
-val CalmSecondary = Color(0xFF94E3D9)
+val CalmPrimary = Color(0xFF622FEE)
+val CalmSecondary = Color(0xFFB094E3)
 val CalmTertiary = Color(0xFFEACFF7)
 
 // Backgrounds
-val CalmBackground = Color(0xFFF8F9FB)
-val CalmSurface = Color(0xFFFFFFFF)
+val CalmBackground = Color(0xFF321D7C)
+val CalmSurface = Color(0xFF432C9D)
 
 // Typography Colors
-val CalmTextPrimary = Color(0xFF1A1A1A)
-val CalmTextSecondary = Color(0xFF6A6A6A)
+val CalmTextPrimary = Color.White
+val CalmTextSecondary = Color.White.copy(alpha = 0.7f)
 
 // Icon States
-val CalmIconPrimary = Color(0xFF4A6FA5)
-val CalmIconMuted = Color(0xFF9EB2CC)
+val CalmIconPrimary = Color.White
+val CalmIconMuted = Color.White.copy(alpha = 0.5f)
 
 // Player/State Colors
 val CalmSuccess = Color(0xFF9BE6A1)
