@@ -2,4 +2,11 @@
 <resources>
 
     <style name="Theme.Calmi" parent="android:Theme.Material.Light.NoActionBar" />
+
+    <style name="Theme.App.Starting" parent="Theme.SplashScreen">
+        <item name="windowSplashScreenBackground">@color/purple_700</item>
+        <item name="postSplashScreenTheme">@style/Theme.Calmi</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
+    </style>
 </resources>
