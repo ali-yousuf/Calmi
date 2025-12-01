@@ -17,6 +17,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Badge
 import androidx.compose.material3.BadgedBox
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -39,11 +40,10 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.calmi.app.R
 import com.calmi.app.ui.screens.home.components.SoundCard
 import com.calmi.app.ui.theme.CalmiTheme
-
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -51,8 +51,6 @@ fun HomeScreen(
     viewModel: HomeViewModel = hiltViewModel()
 ) {
     var searchQuery by remember { mutableStateOf("") }
-    var isPlaying by remember { mutableStateOf(false) }
-
     val uiState by viewModel.uiState.collectAsState()
 
     Scaffold(
@@ -60,14 +58,14 @@ fun HomeScreen(
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(16.dp)
+                    .padding(16.dp),
             ) {
                 Text(
                     text = "CALMI",
                     style = MaterialTheme.typography.headlineMedium.copy(
-                        fontWeight = FontWeight.Bold
+                        fontWeight = FontWeight.Bold,
                     ),
-                    modifier = Modifier.align(Alignment.CenterHorizontally)
+                    modifier = Modifier.align(Alignment.CenterHorizontally),
                 )
                 TextField(
                     value = searchQuery,
@@ -76,7 +74,7 @@ fun HomeScreen(
                     leadingIcon = {
                         Icon(
                             painter = painterResource(id = R.drawable.ic_search),
-                            contentDescription = null
+                            contentDescription = null,
                         )
                     },
                     modifier = Modifier
@@ -85,8 +83,8 @@ fun HomeScreen(
                     shape = RoundedCornerShape(16.dp),
                     colors = TextFieldDefaults.colors(
                         focusedIndicatorColor = Color.Transparent,
-                        unfocusedIndicatorColor = Color.Transparent
-                    )
+                        unfocusedIndicatorColor = Color.Transparent,
+                    ),
                 )
             }
         },
@@ -95,14 +93,14 @@ fun HomeScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(64.dp)
-                    .background(color = MaterialTheme.colorScheme.primary)
+                    .background(color = MaterialTheme.colorScheme.primary),
             ) {
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(16.dp),
                     horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
+                    verticalAlignment = Alignment.CenterVertically,
                 ) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Text(text = "29:45", style = MaterialTheme.typography.bodyLarge)
@@ -111,49 +109,58 @@ fun HomeScreen(
                         }
                     }
                     IconButton(
-                        onClick = { isPlaying = !isPlaying },
+                        onClick = { viewModel.onPlayPauseClicked() },
                         modifier = Modifier
                             .size(64.dp)
                             .clip(CircleShape)
-                            .background(MaterialTheme.colorScheme.secondary)
+                            .background(MaterialTheme.colorScheme.secondary),
                     ) {
                         Icon(
-                            painter = painterResource(id = if (isPlaying) R.drawable.ic_pause else R.drawable.ic_play),
-                            contentDescription = if (isPlaying) "Pause" else "Play",
+                            painter = painterResource(
+                                id = if (uiState.soundList.any { it.isPlaying }) R.drawable.ic_pause else R.drawable.ic_play,
+                            ),
+                            contentDescription = if (uiState.soundList.any { it.isPlaying }) "Pause" else "Play",
                             tint = Color.White,
-                            modifier = Modifier.size(32.dp)
+                            modifier = Modifier.size(32.dp),
                         )
                     }
                     BadgedBox(
-                        badge = { Badge { Text("3") } }
+                        badge = { Badge { Text("3") } },
                     ) {
                         Icon(
                             painter = painterResource(id = R.drawable.ic_mixer),
-                            contentDescription = "Mixer"
+                            contentDescription = "Mixer",
                         )
                     }
                 }
             }
-
-        }
+        },
     ) { paddingValues ->
-        LazyVerticalGrid(
-            columns = GridCells.Fixed(2),
-            contentPadding = paddingValues,
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(horizontal = 16.dp)
-                .padding(bottom = 16.dp),
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            items(uiState.soundList) { sound ->
-                SoundCard(sound = sound)
+        if (uiState.isLoading) {
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center,
+            ) {
+                CircularProgressIndicator()
+            }
+        } else {
+            LazyVerticalGrid(
+                columns = GridCells.Fixed(2),
+                contentPadding = paddingValues,
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(horizontal = 16.dp)
+                    .padding(bottom = 16.dp),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                items(uiState.soundList) { sound ->
+                    SoundCard(sound = sound, onSoundClicked = viewModel::onSoundClicked)
+                }
             }
         }
     }
 }
-
 
 @Preview(showBackground = true)
 @Composable

@@ -36,5 +36,5 @@ class SoundRepositoryImpl(
 
 // Mapper
 private fun SoundEntity.toDomain() = Sound(
-    id, name, imagePath, audioPath.toUri(), isFavorite, volume
+    id, name, imagePath, "file:///android_asset/sounds/${audio}", isFavorite, volume
 )
