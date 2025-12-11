@@ -1,9 +1,11 @@
 package com.calmi.app.ui.screens.home
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -14,7 +16,6 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Badge
 import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.CircularProgressIndicator
@@ -24,14 +25,10 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
-import androidx.compose.material3.TextFieldDefaults
+import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -42,51 +39,29 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.calmi.app.R
+import com.calmi.app.domain.model.Sound
 import com.calmi.app.ui.screens.home.components.SoundCard
 import com.calmi.app.ui.theme.CalmiTheme
 
+@RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
     viewModel: HomeViewModel = hiltViewModel()
 ) {
-    var searchQuery by remember { mutableStateOf("") }
+
     val uiState by viewModel.uiState.collectAsState()
 
     Scaffold(
         topBar = {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp),
-            ) {
+            TopAppBar(title = {
                 Text(
                     text = "CALMI",
                     style = MaterialTheme.typography.headlineMedium.copy(
                         fontWeight = FontWeight.Bold,
                     ),
-                    modifier = Modifier.align(Alignment.CenterHorizontally),
                 )
-                TextField(
-                    value = searchQuery,
-                    onValueChange = { searchQuery = it },
-                    placeholder = { Text("Search sounds...") },
-                    leadingIcon = {
-                        Icon(
-                            painter = painterResource(id = R.drawable.ic_search),
-                            contentDescription = null,
-                        )
-                    },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(top = 16.dp),
-                    shape = RoundedCornerShape(16.dp),
-                    colors = TextFieldDefaults.colors(
-                        focusedIndicatorColor = Color.Transparent,
-                        unfocusedIndicatorColor = Color.Transparent,
-                    ),
-                )
-            }
+            })
         },
         bottomBar = {
             Box(
@@ -144,28 +119,51 @@ fun HomeScreen(
                 CircularProgressIndicator()
             }
         } else {
-            LazyVerticalGrid(
-                columns = GridCells.Fixed(2),
-                contentPadding = paddingValues,
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(horizontal = 16.dp)
-                    .padding(bottom = 16.dp),
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp),
-            ) {
-                items(uiState.soundList) { sound ->
-                    SoundCard(sound = sound, onSoundClicked = viewModel::onSoundClicked)
-                }
-            }
+            HomeScreenContent(
+                paddingValues = paddingValues,
+                sounds = uiState.soundList,
+                onSoundClicked = { viewModel.onSoundClicked(it)},
+            )
         }
     }
 }
 
+@Composable
+fun HomeScreenContent(
+    paddingValues: PaddingValues,
+    sounds: List<Sound>,
+    onSoundClicked: (Sound) -> Unit,
+) {
+    LazyVerticalGrid(
+        columns = GridCells.Fixed(2),
+        contentPadding = paddingValues,
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(horizontal = 16.dp, vertical = 16.dp),
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
+        items(sounds) { sound ->
+            SoundCard(sound = sound, onSoundClicked = onSoundClicked)
+        }
+    }
+}
+
+
 @Preview(showBackground = true)
 @Composable
-fun HomeScreenPreview() {
+fun HomeScreenContentPreview() {
+    val sounds = listOf(
+        Sound("ocean", "Ocean Waves", "file:///android_asset/images/ocean.jpg", "ocean.wav"),
+        Sound("ocean", "Ocean Waves", "file:///android_asset/images/ocean.jpg", "ocean.wav"),
+        Sound("ocean", "Ocean Waves", "file:///android_asset/images/ocean.jpg", "ocean.wav"),
+        Sound("ocean", "Ocean Waves", "file:///android_asset/images/ocean.jpg", "ocean.wav"),
+    )
     CalmiTheme {
-        HomeScreen()
+        HomeScreenContent(
+            paddingValues = PaddingValues(),
+            sounds = sounds,
+            onSoundClicked = {}
+        )
     }
 }
