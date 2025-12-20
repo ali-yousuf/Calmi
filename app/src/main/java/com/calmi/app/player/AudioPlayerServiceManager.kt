@@ -59,11 +59,22 @@ class AudioPlayerServiceManager @Inject constructor(
 
     fun pauseAll() {
         audioPlayerService?.pauseAll()
-        _isPlayingState.update { it.mapValues { false } }
+        _isPlayingState.update { currentMap ->
+            currentMap.toMutableMap().apply {
+                keys.forEach { key -> put(key, false) }
+            }
+        }
     }
 
-    fun resumeAll() {
+    fun resumeAll(sounds: List<Sound>) {
         audioPlayerService?.resumeAll()
+        _isPlayingState.update { currentMap ->
+            currentMap.toMutableMap().apply {
+                sounds.forEach { sound ->
+                    put(sound.id, true)
+                }
+            }
+        }
     }
 
     fun release() {

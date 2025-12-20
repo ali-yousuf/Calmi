@@ -2,6 +2,7 @@ package com.calmi.app.ui.screens.home
 
 import android.os.Build
 import androidx.annotation.RequiresApi
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
@@ -19,13 +20,18 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.navigation.NavController
 import com.calmi.app.domain.model.Sound
+import com.calmi.app.navigation.Screens
+import com.calmi.app.ui.screens.SoundPlayerEvent
+import com.calmi.app.ui.screens.SoundPlayerViewModel
 import com.calmi.app.ui.screens.home.components.BottomMiniPlayer
 import com.calmi.app.ui.screens.home.components.SoundCard
 import com.calmi.app.ui.theme.CalmiTheme
@@ -34,8 +40,16 @@ import com.calmi.app.ui.theme.CalmiTheme
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
-    viewModel: HomeViewModel = hiltViewModel()
+    navController: NavController,
 ) {
+    // Find the back stack entry for the parent navigation graph
+    val parentEntry = remember(navController.currentBackStackEntry) {
+        navController.getBackStackEntry(Screens.Home.route) // Use the route of your graph's start destination
+    }
+
+    // Pass the parent entry to hiltViewModel to get the shared ViewModel
+    val viewModel: SoundPlayerViewModel = hiltViewModel(parentEntry)
+
 
     val uiState by viewModel.uiState.collectAsState()
 
@@ -44,9 +58,7 @@ fun HomeScreen(
             TopAppBar(title = {
                 Text(
                     text = "CALMI",
-                    style = MaterialTheme.typography.headlineMedium.copy(
-                        fontWeight = FontWeight.Bold,
-                    ),
+                    style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.Bold)
                 )
             })
         },
@@ -58,23 +70,21 @@ fun HomeScreen(
                 HomeScreenContent(
                     paddingValues = paddingValues,
                     sounds = uiState.soundList,
-                    onSoundClicked = { viewModel.onSoundClicked(it) },
+                    onSoundClicked = { viewModel.onEvent(SoundPlayerEvent.SoundClicked(it)) },
                 )
             }
 
 
-            val isPlaying = uiState.soundList.any { it.isPlaying }
-            if (isPlaying) {
-                val currentPlayingSound = uiState.soundList.first { it.isPlaying }
-                val badgeCount = uiState.soundList.map { it.isPlaying }.count { it }
+            if (uiState.hasActiveSounds) {
                 BottomMiniPlayer(
                     modifier = Modifier
                         .align(Alignment.BottomCenter)
-                        .padding(vertical = 40.dp, horizontal = 24.dp),
-                    isPlaying = true,
-                    currentPlayingSound = currentPlayingSound,
-                    badgeCount = badgeCount,
-                    onPlayPauseClicked = { viewModel.onPlayPauseClicked() }
+                        .padding(vertical = 40.dp, horizontal = 24.dp)
+                        .clickable { navController.navigate(Screens.Player.route) },
+                    isPlaying = uiState.isPlaying,
+                    currentPlayingSound = uiState.activeSounds.first(),
+                    badgeCount = uiState.activeSounds.size,
+                    onPlayPauseClicked = { viewModel.onEvent(SoundPlayerEvent.PlayPauseClicked) }
                 )
             }
         }
@@ -107,10 +117,10 @@ fun HomeScreenContent(
 @Composable
 fun HomeScreenContentPreview() {
     val sounds = listOf(
-        Sound("ocean", "Ocean Waves", "file:///android_asset/images/ocean.jpg", "ocean.wav"),
-        Sound("ocean", "Ocean Waves", "file:///android_asset/images/ocean.jpg", "ocean.wav"),
-        Sound("ocean", "Ocean Waves", "file:///android_asset/images/ocean.jpg", "ocean.wav"),
-        Sound("ocean", "Ocean Waves", "file:///android_asset/images/ocean.jpg", "ocean.wav"),
+        Sound("ocean", "Ocean Waves", "", "file:///android_asset/images/ocean.jpg"),
+        Sound("ocean", "Ocean Waves", "", "file:///android_asset/images/ocean.jpg"),
+        Sound("ocean", "Ocean Waves", "", "file:///android_asset/images/ocean.jpg"),
+        Sound("ocean", "Ocean Waves", "", "file:///android_asset/images/ocean.jpg"),
     )
     CalmiTheme {
         HomeScreenContent(
