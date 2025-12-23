@@ -38,6 +38,7 @@ fun BottomMiniPlayer(
     modifier: Modifier = Modifier,
     isPlaying: Boolean,
     currentPlayingSound: Sound,
+    timerDuration: String = "00:00",
     badgeCount: Int = 0,
     onPlayPauseClicked: () -> Unit = {},
 ) {
@@ -87,7 +88,7 @@ fun BottomMiniPlayer(
                         )
                         Spacer(modifier = Modifier.width(4.dp))
                         Text(
-                            text = "15:44", // Static for now
+                            text = timerDuration,
                             color = Color.LightGray,
                             style = MaterialTheme.typography.bodySmall
                         )

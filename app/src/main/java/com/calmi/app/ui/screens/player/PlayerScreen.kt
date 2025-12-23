@@ -18,14 +18,20 @@ import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.BlurredEdgeTreatment
@@ -44,7 +50,10 @@ import com.calmi.app.ui.screens.SoundPlayerEvent
 import com.calmi.app.ui.screens.SoundPlayerUiState
 import com.calmi.app.ui.screens.SoundPlayerViewModel
 import com.calmi.app.ui.screens.player.components.AnimatedCircularPlayerView
+import com.calmi.app.ui.screens.player.components.TimerBottomSheet
+import kotlinx.coroutines.launch
 
+@OptIn(ExperimentalMaterial3Api::class)
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun PlayerScreen(navController: NavController) {
@@ -56,10 +65,48 @@ fun PlayerScreen(navController: NavController) {
     // Pass the same parent entry to get the SAME shared ViewModel instance
     val viewModel: SoundPlayerViewModel = hiltViewModel(parentEntry)
     val uiState by viewModel.uiState.collectAsState()
+
+
+    val sheetState = rememberModalBottomSheetState()
+    val scope = rememberCoroutineScope()
+    var showBottomSheet by remember { mutableStateOf(false) }
+
+    if (showBottomSheet) {
+        ModalBottomSheet(
+            onDismissRequest = { showBottomSheet = false },
+            sheetState = sheetState,
+            containerColor = MaterialTheme.colorScheme.surfaceContainerLow
+        ) {
+            TimerBottomSheet(
+                onTimerSelected = { duration ->
+                    viewModel.onEvent(SoundPlayerEvent.SetTimer(duration))
+                },
+                onDismiss = {
+                    scope.launch { sheetState.hide() }.invokeOnCompletion {
+                        if (!sheetState.isVisible) {
+                            showBottomSheet = false
+                        }
+                    }
+                }
+            )
+        }
+    }
+
+    // This handles a crash if the user navigates here with no active sounds.
+    if (uiState.activeSounds.isEmpty()) {
+        // You can show a message or simply navigate back.
+        // For now, we'll just prevent the content from showing to avoid a crash.
+        LaunchedEffect(Unit) {
+            navController.popBackStack()
+        }
+        return
+    }
+
     PlayerScreenContent(
         uiState = uiState,
         onBackClicked = { navController.popBackStack() },
-        onPlayPauseClicked = { viewModel.onEvent(SoundPlayerEvent.PlayPauseClicked) }
+        onPlayPauseClicked = { viewModel.onEvent(SoundPlayerEvent.PlayPauseClicked) },
+        onTimerClicked = { showBottomSheet = true }
     )
 }
 
@@ -69,6 +116,7 @@ fun PlayerScreenContent(
     uiState: SoundPlayerUiState,
     onBackClicked: () -> Unit,
     onPlayPauseClicked: () -> Unit,
+    onTimerClicked: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Scaffold(
@@ -121,10 +169,11 @@ fun PlayerScreenContent(
                     isPlaying = uiState.isPlaying,
                     content = {
                         Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                            Text("20:16", style = MaterialTheme.typography.displayLarge.copy(color = Color.White))
-                            TextButton(
-                                onClick = {/*TODO: implement set timer */}
-                            ) {
+                            Text(
+                                uiState.formattedTime,
+                                style = MaterialTheme.typography.displayLarge.copy(color = Color.White)
+                            )
+                            TextButton(onClick = onTimerClicked) {
                                 Text("Timer", style = MaterialTheme.typography.bodyMedium.copy(color = Color.White))
                             }
                         }
@@ -155,5 +204,10 @@ fun PlayerScreenContent(
 @Composable
 fun PlayerScreenPreview() {
     val uiState = SoundPlayerUiState()
-    PlayerScreenContent(uiState = uiState, onBackClicked = {}, onPlayPauseClicked = {})
+    PlayerScreenContent(
+        uiState = uiState,
+        onBackClicked = {},
+        onPlayPauseClicked = {},
+        onTimerClicked = { }
+    )
 }

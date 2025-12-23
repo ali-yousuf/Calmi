@@ -33,6 +33,14 @@ class SoundPlayerViewModel @Inject constructor(
                 onEvent(SoundPlayerEvent.PlaybackStateChanged(playingStateMap))
             }
             .launchIn(viewModelScope)
+
+        // Listen for timer countdown ticks
+        audioPlayerServiceManager.remainingTime
+            .onEach { remainingSeconds ->
+                // Feed the time update back into the ViewModel
+                onEvent(SoundPlayerEvent.TimerTicked(remainingSeconds))
+            }
+            .launchIn(viewModelScope)
         onEvent(SoundPlayerEvent.LoadSounds)
     }
 
@@ -86,6 +94,15 @@ class SoundPlayerViewModel @Inject constructor(
                             s.copy(isPlaying = event.playingStateMap[s.id] ?: false)
                         }
                     )
+                }
+            }
+            is SoundPlayerEvent.SetTimer -> {
+                audioPlayerServiceManager.setTimer(event.duration)
+                _uiState.update { it.copy(timerDuration = event.duration) }
+            }
+            is SoundPlayerEvent.TimerTicked -> {
+                _uiState.update { currentState ->
+                    currentState.copy(remainingTime = event.remainingSeconds)
                 }
             }
         }

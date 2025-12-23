@@ -83,6 +83,7 @@ fun HomeScreen(
                         .clickable { navController.navigate(Screens.Player.route) },
                     isPlaying = uiState.isPlaying,
                     currentPlayingSound = uiState.activeSounds.first(),
+                    timerDuration = uiState.formattedTime,
                     badgeCount = uiState.activeSounds.size,
                     onPlayPauseClicked = { viewModel.onEvent(SoundPlayerEvent.PlayPauseClicked) }
                 )
