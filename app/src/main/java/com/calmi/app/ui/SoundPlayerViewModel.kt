@@ -6,7 +6,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.calmi.app.di.SoundUseCases
 import com.calmi.app.domain.model.Sound
-import com.calmi.app.player.AudioPlayerServiceManager
+import com.calmi.app.player.AudioPlayerManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -21,23 +21,22 @@ import javax.inject.Inject
 @RequiresApi(Build.VERSION_CODES.O)
 class SoundPlayerViewModel @Inject constructor(
     private val soundsUseCase: SoundUseCases,
-    private val audioPlayerServiceManager: AudioPlayerServiceManager
+    private val audioPlayerManager: AudioPlayerManager
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(SoundPlayerUiState())
     val uiState = _uiState.asStateFlow()
 
     init {
-        audioPlayerServiceManager.isPlayingState
+        audioPlayerManager.isPlayingState
             .onEach { playingStateMap ->
                 onEvent(SoundPlayerEvent.PlaybackStateChanged(playingStateMap))
             }
             .launchIn(viewModelScope)
 
-        // Listen for timer countdown ticks
-        audioPlayerServiceManager.remainingTime
+
+        audioPlayerManager.remainingTime
             .onEach { remainingSeconds ->
-                // Feed the time update back into the ViewModel
                 onEvent(SoundPlayerEvent.TimerTicked(remainingSeconds))
             }
             .launchIn(viewModelScope)
@@ -60,7 +59,7 @@ class SoundPlayerViewModel @Inject constructor(
                     currentState.copy(
                         isLoading = false,
                         soundList = event.sounds.map { s ->
-                            s.copy(isPlaying = audioPlayerServiceManager.isPlaying(s))
+                            s.copy(isPlaying = audioPlayerManager.isPlaying(s))
                         }
                     )
                 }
@@ -76,10 +75,10 @@ class SoundPlayerViewModel @Inject constructor(
 
             is SoundPlayerEvent.PlayPauseClicked -> {
                 if (_uiState.value.isPlaying) {
-                    audioPlayerServiceManager.pauseAll()
+                    audioPlayerManager.pauseAll()
                 } else {
                     val soundsToResume = _uiState.value.activeSounds
-                    audioPlayerServiceManager.resumeAll(soundsToResume)
+                    audioPlayerManager.resumeAll(soundsToResume)
                 }
             }
 
@@ -96,10 +95,12 @@ class SoundPlayerViewModel @Inject constructor(
                     )
                 }
             }
+
             is SoundPlayerEvent.SetTimer -> {
-                audioPlayerServiceManager.setTimer(event.duration)
+                audioPlayerManager.setTimer(event.duration)
                 _uiState.update { it.copy(timerDuration = event.duration) }
             }
+
             is SoundPlayerEvent.TimerTicked -> {
                 _uiState.update { currentState ->
                     currentState.copy(remainingTime = event.remainingSeconds)
@@ -113,16 +114,21 @@ class SoundPlayerViewModel @Inject constructor(
         val soundInMix = currentState.activeSounds.find { it.id == sound.id }
 
         if (soundInMix != null) {
-            audioPlayerServiceManager.pause(sound)
+            audioPlayerManager.pause(sound)
             _uiState.update {
                 it.copy(activeSounds = it.activeSounds.filterNot { s -> s.id == sound.id })
             }
         } else {
-            audioPlayerServiceManager.play(sound)
+            audioPlayerManager.play(sound)
             _uiState.update {
                 it.copy(activeSounds = it.activeSounds + sound)
             }
         }
+    }
+
+    override fun onCleared() {
+        audioPlayerManager.release()
+        super.onCleared()
     }
 }
 

@@ -8,36 +8,65 @@ import android.os.Build
 import android.os.IBinder
 import androidx.annotation.RequiresApi
 import com.calmi.app.domain.model.Sound
-import com.calmi.app.utils.Constants
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.time.Duration
+
+
+/**
+ * Defines the contract for managing audio playback and timers.
+ * This abstraction allows for decoupling the ViewModel from the concrete implementation.
+ */
+interface AudioPlayerManager {
+
+    /** A flow that emits the current playback state of all sounds. (Map of soundId to isPlaying) */
+    val isPlayingState: StateFlow<Map<String, Boolean>>
+
+    /** A flow that emits the remaining time of the countdown timer in seconds. */
+    val remainingTime: StateFlow<Long>
+
+    /** Plays a given sound. */
+    fun play(sound: Sound)
+
+    /** Pauses a given sound. */
+    fun pause(sound: Sound)
+
+    /** Pauses all currently playing sounds and the timer. */
+    fun pauseAll()
+
+    /** Resumes playback for a given list of sounds and the timer. */
+    fun resumeAll(sounds: List<Sound>)
+
+    /** Sets the countdown timer to a specific duration. */
+    fun setTimer(duration: Duration)
+
+    /** Checks if a specific sound is currently marked as playing. */
+    fun isPlaying(sound: Sound): Boolean
+
+    /** Releases all resources used by the manager (service connection, timers, etc.). */
+    fun release()
+}
+
 
 @Singleton
 @RequiresApi(Build.VERSION_CODES.O)
 class AudioPlayerServiceManager @Inject constructor(
     @ApplicationContext private val context: Context
-) {
+) : AudioPlayerManager {
     private var audioPlayerService: AudioPlayerService? = null
     private val _isPlayingState = MutableStateFlow(mapOf<String, Boolean>())
-    val isPlayingState: StateFlow<Map<String, Boolean>> = _isPlayingState.asStateFlow()
+    override val isPlayingState: StateFlow<Map<String, Boolean>> = _isPlayingState.asStateFlow()
 
-    private val scope = CoroutineScope(Dispatchers.Default)
-    private var timerJob: Job? = null
-    private var _timerDuration: Duration = Constants.DEFAULT_TIMER_DURATION
-    private val _remainingTime = MutableStateFlow(_timerDuration.inWholeSeconds)
-    val remainingTime: StateFlow<Long> = _remainingTime.asStateFlow()
+    private val timer = PausableTimer()
+    override val remainingTime: StateFlow<Long> = timer.remainingTime
 
     private val serviceConnection = object : ServiceConnection {
         override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
@@ -57,39 +86,36 @@ class AudioPlayerServiceManager @Inject constructor(
         }
     }
 
-    fun play(sound: Sound) {
+    override fun play(sound: Sound) {
         audioPlayerService?.play(sound)
         _isPlayingState.update { it.toMutableMap().apply { put(sound.id, true) } }
-        startPausableTimer()
+        startTimer()
     }
 
-    fun pause(sound: Sound) {
+    override fun pause(sound: Sound) {
         audioPlayerService?.pause(sound)
         _isPlayingState.update { it.toMutableMap().apply { put(sound.id, false) } }
 
-        // If no other sounds are playing, pause the timer
         if (_isPlayingState.value.values.none { it }) {
-            // Reset the timer
-            _remainingTime.value = _timerDuration.inWholeSeconds
-            pauseTimer()
+            timer.reset()
         }
     }
 
-    fun isPlaying(sound: Sound): Boolean {
+    override fun isPlaying(sound: Sound): Boolean {
         return _isPlayingState.value[sound.id] ?: false
     }
 
-    fun pauseAll() {
+    override fun pauseAll() {
         audioPlayerService?.pauseAll()
         _isPlayingState.update { currentMap ->
             currentMap.toMutableMap().apply {
                 keys.forEach { key -> put(key, false) }
             }
         }
-        pauseTimer()
+        timer.pause()
     }
 
-    fun resumeAll(sounds: List<Sound>) {
+    override fun resumeAll(sounds: List<Sound>) {
         audioPlayerService?.resumeAll()
         _isPlayingState.update { currentMap ->
             currentMap.toMutableMap().apply {
@@ -98,52 +124,32 @@ class AudioPlayerServiceManager @Inject constructor(
                 }
             }
         }
-        startPausableTimer()
+        startTimer()
     }
 
-    fun setTimer(duration: Duration) {
-        pauseTimer()
-        if (duration.isNegative() || duration == Duration.ZERO) {
-            _remainingTime.value = 0L
-            return
+    override fun setTimer(duration: Duration) {
+        timer.setDuration(duration)
+        if (_isPlayingState.value.values.any { it }) {
+            startTimer()
         }
-        _timerDuration = duration
-        _remainingTime.value = duration.inWholeSeconds
-        startPausableTimer()
     }
 
-    private fun startPausableTimer() {
-        //reset the timer if resume again
-        if (_remainingTime.value == 0L){
-            _remainingTime.value = _timerDuration.inWholeSeconds
-        }
-
-        if (timerJob?.isActive == true || _remainingTime.value <= 0) return
-
-        timerJob = scope.launch {
-            while (_remainingTime.value > 0) {
-                delay(1000)
-                _remainingTime.update { it - 1 }
-            }
-            // When timer finishes, pause everything
-            if (_remainingTime.value <= 0) {
-                withContext(Dispatchers.Main) {
-                    pauseAll()
-                }
+    private fun startTimer() {
+        timer.start {
+            CoroutineScope(Dispatchers.Main).launch {
+                pauseAll()
             }
         }
     }
 
-    private fun pauseTimer() {
-        timerJob?.cancel()
-    }
-
-
-    fun release() {
+    override fun release() {
+        timer.release()
         Intent(context, AudioPlayerService::class.java).also { intent ->
-            context.unbindService(serviceConnection)
+            if (audioPlayerService != null) {
+                context.unbindService(serviceConnection)
+            }
             context.stopService(intent)
         }
     }
 }
-    
+
