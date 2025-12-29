@@ -1,9 +1,20 @@
-package com.calmi.app.ui.screens
+package com.calmi.app.ui
 
 import com.calmi.app.domain.model.Sound
 import com.calmi.app.utils.Constants
 import com.calmi.app.utils.toMmSs
 import kotlin.time.Duration
+
+sealed interface SoundPlayerEvent {
+    data object LoadSounds : SoundPlayerEvent
+    data class SoundClicked(val sound: Sound) : SoundPlayerEvent
+    data object PlayPauseClicked : SoundPlayerEvent
+    data class PlaybackStateChanged(val playingStateMap: Map<String, Boolean>) : SoundPlayerEvent
+    data class SoundsLoaded(val sounds: List<Sound>) : SoundPlayerEvent
+    data class LoadFailed(val error: Throwable) : SoundPlayerEvent
+    data class SetTimer(val duration: Duration) : SoundPlayerEvent
+    data class TimerTicked(val remainingSeconds: Long) : SoundPlayerEvent
+}
 
 data class SoundPlayerUiState(
     val isLoading: Boolean = false,

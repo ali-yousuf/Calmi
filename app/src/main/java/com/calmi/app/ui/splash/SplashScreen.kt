@@ -1,4 +1,4 @@
-package com.calmi.app.ui.screens
+package com.calmi.app.ui.splash
 
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
@@ -33,7 +33,7 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.calmi.app.R
-import com.calmi.app.navigation.Screens
+import com.calmi.app.ui.Route
 import com.calmi.app.ui.theme.CalmiTheme
 import kotlinx.coroutines.delay
 
@@ -49,8 +49,8 @@ fun SplashScreen(navController: NavController) {
     LaunchedEffect(key1 = true) {
         startAnimation = true
         delay(2000)
-        navController.navigate(Screens.Home.route) {
-            popUpTo(Screens.Splash.route) {
+        navController.navigate(Route.Home.route) {
+            popUpTo(Route.Splash.route) {
                 inclusive = true
             }
         }

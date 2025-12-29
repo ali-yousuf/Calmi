@@ -1,4 +1,4 @@
-package com.calmi.app.ui.screens.player.components
+package com.calmi.app.ui.player.components
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn

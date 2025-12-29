@@ -1,4 +1,4 @@
-package com.calmi.app.ui.screens
+package com.calmi.app.ui
 
 import android.os.Build
 import androidx.annotation.RequiresApi

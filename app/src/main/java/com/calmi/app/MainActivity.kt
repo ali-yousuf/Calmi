@@ -9,7 +9,7 @@ import androidx.annotation.RequiresApi
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
-import com.calmi.app.navigation.NavGraph
+import com.calmi.app.ui.NavGraph
 import com.calmi.app.ui.theme.CalmiTheme
 import com.calmi.app.utils.rememberPermissionHandler
 import dagger.hilt.android.AndroidEntryPoint

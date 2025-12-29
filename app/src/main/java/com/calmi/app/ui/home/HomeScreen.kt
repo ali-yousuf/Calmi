@@ -1,4 +1,4 @@
-package com.calmi.app.ui.screens.home
+package com.calmi.app.ui.home
 
 import android.os.Build
 import androidx.annotation.RequiresApi
@@ -29,11 +29,11 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.calmi.app.domain.model.Sound
-import com.calmi.app.navigation.Screens
-import com.calmi.app.ui.screens.SoundPlayerEvent
-import com.calmi.app.ui.screens.SoundPlayerViewModel
-import com.calmi.app.ui.screens.home.components.BottomMiniPlayer
-import com.calmi.app.ui.screens.home.components.SoundCard
+import com.calmi.app.ui.Route
+import com.calmi.app.ui.SoundPlayerEvent
+import com.calmi.app.ui.SoundPlayerViewModel
+import com.calmi.app.ui.home.components.BottomMiniPlayer
+import com.calmi.app.ui.home.components.SoundCard
 import com.calmi.app.ui.theme.CalmiTheme
 
 @RequiresApi(Build.VERSION_CODES.O)
@@ -44,7 +44,7 @@ fun HomeScreen(
 ) {
     // Find the back stack entry for the parent navigation graph
     val parentEntry = remember(navController.currentBackStackEntry) {
-        navController.getBackStackEntry(Screens.Home.route) // Use the route of your graph's start destination
+        navController.getBackStackEntry(Route.Home.route) // Use the route of your graph's start destination
     }
 
     // Pass the parent entry to hiltViewModel to get the shared ViewModel
@@ -80,7 +80,7 @@ fun HomeScreen(
                     modifier = Modifier
                         .align(Alignment.BottomCenter)
                         .padding(vertical = 40.dp, horizontal = 24.dp)
-                        .clickable { navController.navigate(Screens.Player.route) },
+                        .clickable { navController.navigate(Route.Player.route) },
                     isPlaying = uiState.isPlaying,
                     currentPlayingSound = uiState.activeSounds.first(),
                     timerDuration = uiState.formattedTime,

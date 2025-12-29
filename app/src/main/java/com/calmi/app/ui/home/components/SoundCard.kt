@@ -1,4 +1,4 @@
-package com.calmi.app.ui.screens.home.components
+package com.calmi.app.ui.home.components
 
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
@@ -22,6 +22,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
@@ -115,23 +117,23 @@ private fun AnimatedPlaybackIndicator(modifier: Modifier = Modifier) {
 
         drawRect(
             color = barColor,
-            topLeft = androidx.compose.ui.geometry.Offset(startX1, size.height * (1f - bar1HeightRatio)),
-            size = androidx.compose.ui.geometry.Size(barWidth, size.height * bar1HeightRatio)
+            topLeft = Offset(startX1, size.height * (1f - bar1HeightRatio)),
+            size = Size(barWidth, size.height * bar1HeightRatio)
         )
         drawRect(
             color = barColor,
-            topLeft = androidx.compose.ui.geometry.Offset(startX2, size.height * (1f - bar2HeightRatio)),
-            size = androidx.compose.ui.geometry.Size(barWidth, size.height * bar2HeightRatio)
+            topLeft = Offset(startX2, size.height * (1f - bar2HeightRatio)),
+            size = Size(barWidth, size.height * bar2HeightRatio)
         )
         drawRect(
             color = barColor,
-            topLeft = androidx.compose.ui.geometry.Offset(startX3, size.height * (1f - bar3HeightRatio)),
-            size = androidx.compose.ui.geometry.Size(barWidth, size.height * bar3HeightRatio)
+            topLeft = Offset(startX3, size.height * (1f - bar3HeightRatio)),
+            size = Size(barWidth, size.height * bar3HeightRatio)
         )
         drawRect(
             color = barColor,
-            topLeft = androidx.compose.ui.geometry.Offset(startX4, size.height * (1f - bar4HeightRatio)),
-            size = androidx.compose.ui.geometry.Size(barWidth, size.height * bar4HeightRatio)
+            topLeft = Offset(startX4, size.height * (1f - bar4HeightRatio)),
+            size = Size(barWidth, size.height * bar4HeightRatio)
         )
     }
 }

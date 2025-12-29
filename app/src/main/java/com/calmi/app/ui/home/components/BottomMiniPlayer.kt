@@ -1,4 +1,4 @@
-package com.calmi.app.ui.screens.home.components
+package com.calmi.app.ui.home.components
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background

@@ -1,4 +1,4 @@
-package com.calmi.app.ui.screens.player
+package com.calmi.app.ui.player
 
 import android.os.Build
 import androidx.annotation.RequiresApi
@@ -45,12 +45,12 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation.NavController
 import coil.compose.rememberAsyncImagePainter
 import com.calmi.app.R
-import com.calmi.app.navigation.Screens
-import com.calmi.app.ui.screens.SoundPlayerEvent
-import com.calmi.app.ui.screens.SoundPlayerUiState
-import com.calmi.app.ui.screens.SoundPlayerViewModel
-import com.calmi.app.ui.screens.player.components.AnimatedCircularPlayerView
-import com.calmi.app.ui.screens.player.components.TimerBottomSheet
+import com.calmi.app.ui.Route
+import com.calmi.app.ui.SoundPlayerEvent
+import com.calmi.app.ui.SoundPlayerUiState
+import com.calmi.app.ui.SoundPlayerViewModel
+import com.calmi.app.ui.player.components.AnimatedCircularPlayerView
+import com.calmi.app.ui.player.components.TimerBottomSheet
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -59,7 +59,7 @@ import kotlinx.coroutines.launch
 fun PlayerScreen(navController: NavController) {
     // Find the back stack entry for the parent navigation graph
     val parentEntry = remember(navController.currentBackStackEntry) {
-        navController.getBackStackEntry(Screens.Home.route) // MUST be the same route used in HomeScreen
+        navController.getBackStackEntry(Route.Home.route) // MUST be the same route used in HomeScreen
     }
 
     // Pass the same parent entry to get the SAME shared ViewModel instance
