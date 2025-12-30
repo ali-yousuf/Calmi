@@ -1,7 +1,6 @@
 package com.calmi.app.data.repository
 
 
-import androidx.core.net.toUri
 import com.calmi.app.data.datasource.LocalSoundDataSource
 import com.calmi.app.data.model.SoundEntity
 import com.calmi.app.domain.model.Sound
@@ -20,21 +19,9 @@ class SoundRepositoryImpl(
         soundsFlow.map { list ->
             list.map { it.toDomain() }
         }
-
-    override suspend fun toggleFavorite(id: String) {
-        soundsFlow.value = soundsFlow.value.map {
-            if (it.id == id) it.copy(isFavorite = !it.isFavorite) else it
-        }
-    }
-
-    override suspend fun updateVolume(id: String, volume: Float) {
-        soundsFlow.value = soundsFlow.value.map {
-            if (it.id == id) it.copy(volume = volume) else it
-        }
-    }
 }
 
-// Mapper
+
 private fun SoundEntity.toDomain() = Sound(
-    id, name, imagePath, "file:///android_asset/sounds/${audio}", isFavorite, volume
+    id, name, "file:///android_asset/images/${image}", "file:///android_asset/sounds/${audio}"
 )

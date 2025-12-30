@@ -16,6 +16,6 @@ abstract class PlayerModule {
     @Singleton
     abstract fun bindAudioPlayerManager(
         audioPlayerServiceManager: AudioPlayerServiceManager
-    ): AudioPlayerManager
+        ): AudioPlayerManager
 
 }

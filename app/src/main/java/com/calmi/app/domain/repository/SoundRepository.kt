@@ -6,6 +6,4 @@ import kotlinx.coroutines.flow.Flow
 interface SoundRepository {
 
     fun getSounds(): Flow<List<Sound>>
-    suspend fun toggleFavorite(id: String)
-    suspend fun updateVolume(id: String, volume: Float)
 }

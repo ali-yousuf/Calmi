@@ -26,11 +26,6 @@ object AppModule {
 
     @Provides
     @Singleton
-    fun provideUseCases(repository: SoundRepository) = SoundUseCases(
-        getSounds = GetAllSoundsUseCase(repository),
-    )
+    fun provideUseCases(repository: SoundRepository) = GetAllSoundsUseCase(repository)
 }
 
-data class SoundUseCases(
-    val getSounds: GetAllSoundsUseCase,
-)

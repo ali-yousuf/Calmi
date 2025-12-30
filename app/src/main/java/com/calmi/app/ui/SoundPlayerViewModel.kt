@@ -4,8 +4,8 @@ import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.calmi.app.di.SoundUseCases
 import com.calmi.app.domain.model.Sound
+import com.calmi.app.domain.usecases.GetAllSoundsUseCase
 import com.calmi.app.player.AudioPlayerManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -20,7 +20,7 @@ import javax.inject.Inject
 @HiltViewModel
 @RequiresApi(Build.VERSION_CODES.O)
 class SoundPlayerViewModel @Inject constructor(
-    private val soundsUseCase: SoundUseCases,
+    private val getAllSoundsUseCase: GetAllSoundsUseCase,
     private val audioPlayerManager: AudioPlayerManager
 ) : ViewModel() {
 
@@ -48,7 +48,7 @@ class SoundPlayerViewModel @Inject constructor(
             is SoundPlayerEvent.LoadSounds -> {
                 viewModelScope.launch {
                     _uiState.update { it.copy(isLoading = true) }
-                    soundsUseCase.getSounds()
+                    getAllSoundsUseCase.invoke()
                         .catch { error -> onEvent(SoundPlayerEvent.LoadFailed(error)) }
                         .collect { sounds -> onEvent(SoundPlayerEvent.SoundsLoaded(sounds)) }
                 }

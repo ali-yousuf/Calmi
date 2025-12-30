@@ -23,7 +23,7 @@ object NotificationConstants {
 
 @RequiresApi(Build.VERSION_CODES.O)
 class NotificationHelper @Inject constructor(
-    @ApplicationContext private val context: Context
+    @param:ApplicationContext private val context: Context
 ) {
 
     private val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager

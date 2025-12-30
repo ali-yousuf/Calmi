@@ -59,7 +59,7 @@ interface AudioPlayerManager {
 @Singleton
 @RequiresApi(Build.VERSION_CODES.O)
 class AudioPlayerServiceManager @Inject constructor(
-    @ApplicationContext private val context: Context
+    @param:ApplicationContext private val context: Context
 ) : AudioPlayerManager {
     private var audioPlayerService: AudioPlayerService? = null
     private val _isPlayingState = MutableStateFlow(mapOf<String, Boolean>())
