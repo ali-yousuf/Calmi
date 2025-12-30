@@ -1,6 +1,6 @@
 package com.calmi.app.utils
 
-import java.util.Locale
+
 import kotlin.time.Duration.Companion.seconds
 
 /**
@@ -11,5 +11,5 @@ fun Long.toMmSs(): String {
     val duration = this.seconds
     val minutes = duration.inWholeMinutes
     val seconds = (this % 60)
-    return String.format(Locale.US, "%02d:%02d", minutes, seconds)
+    return String.format(Constants.TIME_FORMAT_LOCALE, Constants.TIME_FORMAT_MM_SS, minutes, seconds)
 }
