@@ -26,8 +26,12 @@ fun NavGraph() {
         navController = navController,
         startDestination = Route.Splash.route
     ) {
-        composable(Route.Splash.route) {
-            SplashScreen(navController = navController)
+        composable("splash") {
+            SplashScreen {
+                navController.navigate("home") {
+                    popUpTo("splash") { inclusive = true }
+                }
+            }
         }
         composable(Route.Home.route) {
             HomeScreen(navController = navController)
